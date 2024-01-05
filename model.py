@@ -42,9 +42,9 @@ def stroški_po_času(št_dni, p_zemlja, p_hiša, št_hiš, mesecni_stroski, del
     začetna_inv = začetna_investicija(p_zemlja, p_hiša, št_hiš, mesecni_stroski, delež_nepredvidljivih_stroškov_na_hiško)
     amortizacija = 0
     for dan in range(1, št_dni + 1):
-        št_mesecev = dan / 30.5
-        št_let = št_mesecev / 12
-        amortizacija += začetna_inv * amortizacijski_faktor ** št_let
+        št_mesecev1 = dan / 30.5
+        št_let1 = št_mesecev / 12
+        amortizacija += začetna_inv * amortizacijska_stopnja ** št_let1 / 365
 
     
     stroški = mesecni_stroski * št_mesecev + amortizacija
