@@ -40,7 +40,7 @@ def stroški_po_času(št_dni, p_zemlja, p_hiša, št_hiš, mesecni_stroski, del
 
     amortizacijski_faktor = 1 - amortizacijska_stopnja
     začetna_inv = začetna_investicija(p_zemlja, p_hiša, št_hiš, mesecni_stroski, delež_nepredvidljivih_stroškov_na_hiško)
-    amortizacija = začetna_inv * amortizacijski_faktor ** št_let
+    amortizacija = sum(začetna_inv * amortizacijski_faktor ** št_let for št_let in range(1, int(št_let) + 1))
     
     stroški = mesecni_stroski * št_mesecev + amortizacija
 
@@ -57,7 +57,7 @@ def prihodki_po_času(št_dni, št_hiš, p_dnevni_najem):
 
     faktor_zasedenosti = pričakovano_št_dni_v_najemu_na_leto / 365
 
-    prihodki = št_hiš * p_dnevni_najem * št_dni * faktor_zasedenosti * (1 - delez_davka_na_dobicek)
+    prihodki = št_hiš * p_dnevni_najem * št_dni * faktor_zasedenosti #* (1 - delez_davka_na_dobicek)
 
     return prihodki
 
@@ -117,7 +117,7 @@ def plot_data(št_let, p_zemlja, p_hiša, št_hiš, mesecni_stroski, p_dnevni_na
     ax.plot(dni, stroški, label='Stroški')
     ax.plot(dni, prihodki, label='Prihodki')
     #ax.plot(dni, vrednost, label='Vrednost')
-    ax.plot(dni, dobiček, label='Dobiček')
+    ax.plot(dni, dobiček, label='Dobiček (po davkih))')
 
     # Set labels and title
     ax.set_xlabel('Leto')
