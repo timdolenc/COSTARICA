@@ -33,16 +33,21 @@ def stroški_čiščenja(št_dni, št_hiš, pričakovano_št_dni_v_najemu_na_let
     return stroški
 
 
-def odhodki_po_času(št_dni, p_zemlja, p_hiša, št_hiš, mesecni_stroski, delež_nepredvidljivih_stroškov_na_hiško):
+def stroški_po_času(št_dni, p_zemlja, p_hiša, št_hiš, mesecni_stroski, delež_nepredvidljivih_stroškov_na_hiško, amortizacijska_stopnja):
     """predpostavlja ničelno om"""
     št_mesecev = št_dni / 30.5
     št_let = št_mesecev / 12
+
+    amortizacijski_faktor = 1 - amortizacijska_stopnja
+    vrednost_investicije = 1
     
-    vložek = p_zemlja + št_hiš * p_hiša * delež_nepredvidljivih_stroškov_na_hiško + mesecni_stroski * št_mesecev 
+    odhodki = mesecni_stroski * št_mesecev 
 
+    return odhodki
+
+def začetna_investicija(p_zemlja, p_hiša, št_hiš, mesecni_stroski, delež_nepredvidljivih_stroškov_na_hiško):
+    vložek = p_zemlja + št_hiš * p_hiša * delež_nepredvidljivih_stroškov_na_hiško
     return vložek
-
-
 
 def prihodki_po_času(št_dni, št_hiš, p_dnevni_najem):
     """predpostavlja ničelno om"""
@@ -72,11 +77,12 @@ def dobiček_po_času(št_dni, p_zemlja, p_hiša, št_hiš, mesecni_stroski, p_d
     št_mesecev = št_dni / 30.5
     št_let = št_mesecev / 12
 
-    vložek = odhodki_po_času(št_dni, p_zemlja, p_hiša, št_hiš, mesecni_stroski, delež_nepredvidljivih_stroškov_na_hiško)
-    vrednost = vrednost_investicije(p_hiša, p_zemlja, št_hiš, amortizacijski_faktor, rast_vr_zemlje, št_dni)
+    stroški = stroški_po_času(št_dni, p_zemlja, p_hiša, št_hiš, mesecni_stroski, delež_nepredvidljivih_stroškov_na_hiško, amortizacijska_stopnja)
+    #vrednost = vrednost_investicije(p_hiša, p_zemlja, št_hiš, amortizacijski_faktor, rast_vr_zemlje, št_dni)
     prihodki = prihodki_po_času(št_dni, št_hiš, p_dnevni_najem)
+    vložek = začetna_investicija(p_zemlja, p_hiša, št_hiš, mesecni_stroski, delež_nepredvidljivih_stroškov_na_hiško)
 
-    dobiček = (prihodki - vložek + vrednost) * (1 - delez_davka_na_dobicek)
+    dobiček = (prihodki - stroški - vložek) * (1 - delez_davka_na_dobicek)
 
     return dobiček
 
@@ -91,12 +97,13 @@ def dobiček_po_času(št_dni, p_zemlja, p_hiša, št_hiš, mesecni_stroski, p_d
 # Vaše funkcije (odhodki_po_času, prihodki_po_času, etc.) tukaj
 
 
-def plot_data(št_let, p_zemlja, p_hiša, št_hiš, mesecni_stroski, p_dnevni_najem, amortizacijski_faktor, rast_vr_zemlje, delež_nepredvidljivih_stroškov_na_hiško, delez_davka_na_dobicek, pričakovano_št_dni_v_najemu_na_leto):
+def plot_data(št_let, p_zemlja, p_hiša, št_hiš, mesecni_stroski, p_dnevni_najem, amortizacijski_faktor, rast_vr_zemlje, delež_nepredvidljivih_stroškov_na_hiško, delez_davka_na_dobicek, pričakovano_št_dni_v_najemu_na_leto, amortizacijska_stopnja):
     št_dni = št_let * 365
     dni = np.arange(1, št_dni + 1)
 
     # Izračuni za vsak dan
-    vložek = [odhodki_po_času(dan, p_zemlja, p_hiša, št_hiš, mesecni_stroski, delež_nepredvidljivih_stroškov_na_hiško) for dan in dni]
+    začetna_inv = [začetna_investicija(p_zemlja, p_hiša, št_hiš, mesecni_stroski, delež_nepredvidljivih_stroškov_na_hiško) for dan in dni]
+    stroški = [stroški_po_času(dan, p_zemlja, p_hiša, št_hiš, mesecni_stroski, delež_nepredvidljivih_stroškov_na_hiško, amortizacijska_stopnja) for dan in dni]
     prihodki = [prihodki_po_času(dan, št_hiš, p_dnevni_najem) for dan in dni]
     vrednost = [vrednost_investicije(p_hiša, p_zemlja, št_hiš, amortizacijski_faktor, rast_vr_zemlje, dan) for dan in dni]
     dobiček = [dobiček_po_času(dan, p_zemlja, p_hiša, št_hiš, mesecni_stroski, p_dnevni_najem, amortizacijski_faktor, rast_vr_zemlje, delež_nepredvidljivih_stroškov_na_hiško, delez_davka_na_dobicek) for dan in dni]
@@ -105,9 +112,10 @@ def plot_data(št_let, p_zemlja, p_hiša, št_hiš, mesecni_stroski, p_dnevni_na
     fig, ax = plt.subplots(figsize=(10, 6))
 
     # Plotting using day numbers
-    ax.plot(dni, vložek, label='Vložek')
+    ax.plot(dni, začetna_inv, label='Začetna investicija')
+    ax.plot(dni, stroški, label='Stroški')
     ax.plot(dni, prihodki, label='Prihodki')
-    ax.plot(dni, vrednost, label='Vrednost')
+    #ax.plot(dni, vrednost, label='Vrednost')
     ax.plot(dni, dobiček, label='Dobiček')
 
     # Set labels and title
@@ -136,8 +144,9 @@ p_hiša = st.sidebar.slider('Cena hiše', min_value=50.0, max_value=200.0, value
 mesecni_stroski = st.sidebar.slider('Mesečni stroški', min_value=0.0, max_value=10.0, value=1.5)
 p_dnevni_najem = st.sidebar.slider('Dnevni najem', min_value=0.1, max_value=1.0, value=0.25)
 št_hiš = st.sidebar.slider('Število hiš', min_value=1, max_value=20, value=8)
-rast_vr_zemlje = st.sidebar.slider('Rast vrednosti zemlje', min_value=0.0, max_value=0.1, value=0.03)
-amortizacijski_faktor = st.sidebar.slider('Amortizacijski faktor', min_value=0.0, max_value=1.0, value=0.9)
+#rast_vr_zemlje = st.sidebar.slider('Rast vrednosti zemlje', min_value=0.0, max_value=0.1, value=0.03)
+#amortizacijski_faktor = st.sidebar.slider('Amortizacijski faktor', min_value=0.0, max_value=1.0, value=0.9)
+amortizacijska_stopnja = st.sidebar.slider('Amortizacijska stopnja', min_value=0.0, max_value=1.0, value=0.1)
 delez_davka_na_dobicek = st.sidebar.slider('Delež davka na dobiček', min_value=0.0, max_value=0.5, value=0.35)
 delež_nepredvidljivih_stroškov_na_hiško = st.sidebar.slider('Delež nepredvidljivih stroškov na hiško', min_value=1.0, max_value=2.0, value=1.1)
 pričakovano_št_dni_v_najemu_na_leto = st.sidebar.slider('Pričakovano število dni v najemu na leto', min_value=0, max_value=365, value=100)
@@ -148,6 +157,6 @@ pričakovano_št_dni_v_najemu_na_leto = st.sidebar.slider('Pričakovano število
 #    st.write(f'Dobiček po {št_let} letih: {dobiček}')
 
 # Klic funkcije plot_data ob spremembi kateregakoli drsnika
-plot_data(št_let, p_zemlja, p_hiša, št_hiš, mesecni_stroski, p_dnevni_najem, amortizacijski_faktor, rast_vr_zemlje, delež_nepredvidljivih_stroškov_na_hiško, delez_davka_na_dobicek, pričakovano_št_dni_v_najemu_na_leto)
+plot_data(št_let, p_zemlja, p_hiša, št_hiš, mesecni_stroski, p_dnevni_najem, amortizacijski_faktor, rast_vr_zemlje, delež_nepredvidljivih_stroškov_na_hiško, delez_davka_na_dobicek, pričakovano_št_dni_v_najemu_na_leto, amortizacijska_stopnja)
 
 
