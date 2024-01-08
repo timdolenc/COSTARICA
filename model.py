@@ -3,69 +3,59 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-p_zemlja = 100
-p_hisa = 90
 
-mesecni_stroski = 1.5
-p_dnevni_najem = 0.25
-
-št_hiš = 8
-
-rast_vr_zemlje = 0.03
-amortizacijski_faktor = 0.9
-
-delez_davka_na_dobicek = 0.35
-delež_nepredvidljivih_stroškov_na_hiško = 1.1
-
-pričakovano_št_dni_v_najemu_na_leto = 100
-
-prič_om = 0.02
-
-
-def stroški_čiščenja(št_dni, št_hiš, pričakovano_št_dni_v_najemu_na_leto):
+#################STROŠKI#####################
+@st.cache_data
+def stroški_čiščenja(št_dni, pričakovano_št_dni_v_najemu_na_leto, pogostost_čiščenja, cena_čiščenja, št_hiš=12):
     št_mesecev = št_dni / 30.5
     št_let = št_mesecev / 12
 
     faktor_zasedenosti = pričakovano_št_dni_v_najemu_na_leto / 365
-
-    stroški = št_hiš * št_dni * faktor_zasedenosti * 0.05
+    št_čiščenj = št_hiš * št_dni * faktor_zasedenosti / pogostost_čiščenja
+    stroški = št_čiščenj * cena_čiščenja 
 
     return stroški
 
+@st.cache_data
+def stroški_amortizacije_po_času(št_dni, začetna_inv, amortizacijska_stopnja):
+    amortizacija = začetna_inv * amortizacijska_stopnja ** (št_dni/365)
+    return amortizacija
 
-def stroški_po_času(št_dni, p_zemlja, p_hiša, št_hiš, mesecni_stroski, delež_nepredvidljivih_stroškov_na_hiško, amortizacijska_stopnja):
+
+def stroški_po_času(št_dni, začetna_inv, amortizacijska_stopnja, pogostost_čiščenja, cena_čiščenja, pričakovano_št_dni_v_najemu_na_leto, p_dnevni_najem, provizija, letni_stroški_vzdrževanja_okolice, letni_ostali_stroški):
     """predpostavlja ničelno om"""
     št_mesecev = št_dni / 30.5
-    št_let = št_mesecev / 12
 
-    amortizacijski_faktor = 1 - amortizacijska_stopnja
-    začetna_inv = začetna_investicija(p_zemlja, p_hiša, št_hiš, mesecni_stroski, delež_nepredvidljivih_stroškov_na_hiško)
-    amortizacija = 0
-    for dan in range(1, št_dni + 1):
-        št_mesecev1 = dan / 30.5
-        št_let1 = št_mesecev / 12
-        amortizacija += začetna_inv * amortizacijska_stopnja ** št_let1 / 365
+    amortizacija = stroški_amortizacije_po_času(št_dni, začetna_inv, amortizacijska_stopnja)
+    čiščenje = stroški_čiščenja(št_dni, pričakovano_št_dni_v_najemu_na_leto, pogostost_čiščenja, cena_čiščenja, št_hiš=12)
+    prihodki = prihodki_po_času(št_dni, p_dnevni_najem)
+    stroški_provizij = prihodki * provizija
 
-    
-    stroški = mesecni_stroski * št_mesecev + amortizacija
-
+    stroški = amortizacija + čiščenje + stroški_provizij
     return stroški
 
-def začetna_investicija(p_zemlja, p_hiša, št_hiš, mesecni_stroski, delež_nepredvidljivih_stroškov_na_hiško):
+
+
+####################################################
+
+def začetna_investicija(p_zemlja, p_hiša, delež_nepredvidljivih_stroškov_na_hiško, št_hiš=12):
     vložek = p_zemlja + št_hiš * p_hiša * delež_nepredvidljivih_stroškov_na_hiško
     return vložek
 
-def prihodki_po_času(št_dni, št_hiš, p_dnevni_najem):
+@st.cache_data
+def prihodki_po_času(št_dni, pričakovano_št_dni_v_najemu_na_leto, p_dnevni_najem, št_hiš=12):
     """predpostavlja ničelno om"""
     št_mesecev = št_dni / 30.5
     št_let = št_mesecev / 12
 
     faktor_zasedenosti = pričakovano_št_dni_v_najemu_na_leto / 365
 
-    prihodki = št_hiš * p_dnevni_najem * št_dni * faktor_zasedenosti #* (1 - delez_davka_na_dobicek)
+    prihodki = št_hiš * p_dnevni_najem * št_dni * faktor_zasedenosti
 
     return prihodki
 
+def stroški_provizije(prihodki, provizija):
+    return prihodki * provizija
 
 def vrednost_investicije(p_hiša, p_zemlja, št_hiš, amortizacijski_faktor, rast_vr_zemlje, št_dni):
     #vrednost
@@ -78,41 +68,29 @@ def vrednost_investicije(p_hiša, p_zemlja, št_hiš, amortizacijski_faktor, ras
 
     return vrednost
 
-
-def dobiček_po_času(št_dni, p_zemlja, p_hiša, št_hiš, mesecni_stroski, p_dnevni_najem, amortizacijski_faktor, rast_vr_zemlje, delež_nepredvidljivih_stroškov_na_hiško, delez_davka_na_dobicek):
-    št_mesecev = št_dni / 30.5
-    št_let = št_mesecev / 12
-
-    stroški = stroški_po_času(št_dni, p_zemlja, p_hiša, št_hiš, mesecni_stroski, delež_nepredvidljivih_stroškov_na_hiško, amortizacijska_stopnja)
-    #vrednost = vrednost_investicije(p_hiša, p_zemlja, št_hiš, amortizacijski_faktor, rast_vr_zemlje, št_dni)
-    prihodki = prihodki_po_času(št_dni, št_hiš, p_dnevni_najem)
-    vložek = začetna_investicija(p_zemlja, p_hiša, št_hiš, mesecni_stroski, delež_nepredvidljivih_stroškov_na_hiško)
-
-    dobiček = (prihodki - stroški - vložek) * (1 - delez_davka_na_dobicek)
+@st.cache_data
+def dobiček_po_času(stroški, prihodki, delez_davka_na_dobicek):
+    dobiček = (prihodki - stroški) * (1 - delez_davka_na_dobicek)
 
     return dobiček
 
 
-#print(odhodki_po_času(0, p_zemlja, p_hisa, št_hiš, mesecni_stroski, delež_nepredvidljivih_stroškov_na_hiško))
-
-#print(prihodki_po_času(0, št_hiš, p_dnevni_najem))
 
 
-
-
-# Vaše funkcije (odhodki_po_času, prihodki_po_času, etc.) tukaj
-
-
-def plot_data(št_let, p_zemlja, p_hiša, št_hiš, mesecni_stroski, p_dnevni_najem, amortizacijski_faktor, rast_vr_zemlje, delež_nepredvidljivih_stroškov_na_hiško, delez_davka_na_dobicek, pričakovano_št_dni_v_najemu_na_leto, amortizacijska_stopnja):
+def plot_data(št_let, skupna_inv, začetna_inv, vrednost_inv, delež_v_podjetju, p_dnevni_najem, delez_davka_na_dobicek, pričakovano_št_dni_v_najemu_na_leto, amortizacijska_stopnja, ):
     št_dni = št_let * 365
     dni = np.arange(1, št_dni + 1)
 
+    vrednost_inv_sez = [vrednost_inv * delež_v_podjetju for dan in dni]
+    začetna_inv_sez = [vložek_investitorja for dan in dni]
+
     # Izračuni za vsak dan
-    začetna_inv = [začetna_investicija(p_zemlja, p_hiša, št_hiš, mesecni_stroski, delež_nepredvidljivih_stroškov_na_hiško) for dan in dni]
-    stroški = [stroški_po_času(dan, p_zemlja, p_hiša, št_hiš, mesecni_stroski, delež_nepredvidljivih_stroškov_na_hiško, amortizacijska_stopnja) for dan in dni]
-    prihodki = [prihodki_po_času(dan, št_hiš, p_dnevni_najem) for dan in dni]
-    vrednost = [vrednost_investicije(p_hiša, p_zemlja, št_hiš, amortizacijski_faktor, rast_vr_zemlje, dan) for dan in dni]
-    dobiček = [dobiček_po_času(dan, p_zemlja, p_hiša, št_hiš, mesecni_stroski, p_dnevni_najem, amortizacijski_faktor, rast_vr_zemlje, delež_nepredvidljivih_stroškov_na_hiško, delez_davka_na_dobicek) for dan in dni]
+    #začetna_inv0 = začetna_investicija(p_zemlja, p_hiša, št_hiš, delež_nepredvidljivih_stroškov_na_hiško)
+    
+    stroški = [stroški_po_času(dan, začetna_inv, mesecni_stroski, amortizacijska_stopnja) for dan in dni]
+    prihodki = [prihodki_po_času(dan, pričakovano_št_dni_v_najemu_na_leto, p_dnevni_najem) for dan in dni]
+    #vrednost = [vrednost_investicije(p_hiša, p_zemlja, št_hiš, amortizacijski_faktor, rast_vr_zemlje, dan) for dan in dni]
+    dobiček = [(prihodki[dan-1] - stroški[dan-1] - začetna_inv) * (1 - delez_davka_na_dobicek) for dan in dni]
 
     # Create a figure and axes object
     fig, ax = plt.subplots(figsize=(10, 6))
@@ -145,16 +123,22 @@ st.title('Investicijski model')
 # Drsnik za število dni
 #št_dni = st.sidebar.slider('Število dni', min_value=1, max_value=365*30, value=365*10)
 št_let = st.sidebar.slider('Število let', min_value=1, max_value=30, value=10)
-p_zemlja = st.sidebar.slider('Cena zemlje', min_value=50.0, max_value=200.0, value=100.0)
-p_hiša = st.sidebar.slider('Cena hiše', min_value=50.0, max_value=200.0, value=90.0)
-mesecni_stroski = st.sidebar.slider('Mesečni stroški', min_value=0.0, max_value=10.0, value=1.5)
-p_dnevni_najem = st.sidebar.slider('Dnevni najem', min_value=0.1, max_value=1.0, value=0.25)
-št_hiš = st.sidebar.slider('Število hiš', min_value=1, max_value=20, value=8)
+#p_zemlja = st.sidebar.slider('Cena zemlje', min_value=50.0, max_value=200.0, value=100.0)
+#p_hiša = st.sidebar.slider('Cena hiše', min_value=50.0, max_value=200.0, value=90.0)
+
+skupni_vložek = st.sidebar.slider('Vložek', min_value=0, max_value=3000, value=2100)
+vložek_investitorja = st.sidebar.slider('Vložek investitorja', min_value=0, max_value=3000, value=2100)
+delež_investitorja = st.sidebar.slider('Delež investitorja', min_value=0.0, max_value=1.0, value=0.12)
+
+
+#mesecni_stroski = st.sidebar.slider('Mesečni stroški', min_value=0.0, max_value=10.0, value=1.5)
+#p_dnevni_najem = st.sidebar.slider('Dnevni najem', min_value=0.1, max_value=1.0, value=0.25)
+#št_hiš = st.sidebar.slider('Število hiš', min_value=1, max_value=20, value=12)
 #rast_vr_zemlje = st.sidebar.slider('Rast vrednosti zemlje', min_value=0.0, max_value=0.1, value=0.03)
 #amortizacijski_faktor = st.sidebar.slider('Amortizacijski faktor', min_value=0.0, max_value=1.0, value=0.9)
-amortizacijska_stopnja = st.sidebar.slider('Amortizacijska stopnja', min_value=0.0, max_value=1.0, value=0.1)
-delez_davka_na_dobicek = st.sidebar.slider('Delež davka na dobiček', min_value=0.0, max_value=0.5, value=0.35)
-delež_nepredvidljivih_stroškov_na_hiško = st.sidebar.slider('Delež nepredvidljivih stroškov na hiško', min_value=1.0, max_value=2.0, value=1.1)
+amortizacijska_stopnja = st.sidebar.slider('Amortizacijska stopnja', min_value=0.0, max_value=1.0, value=0.05)
+delez_davka_na_dobicek = st.sidebar.slider('Delež davka na dobiček', min_value=0.0, max_value=0.5, value=0.30)
+#delež_nepredvidljivih_stroškov_na_hiško = st.sidebar.slider('Delež nepredvidljivih stroškov na hiško', min_value=1.0, max_value=2.0, value=1.1)
 pričakovano_št_dni_v_najemu_na_leto = st.sidebar.slider('Pričakovano število dni v najemu na leto', min_value=0, max_value=365, value=100)
 
 
