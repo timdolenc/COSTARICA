@@ -90,7 +90,7 @@ class Model:
         fig, ax = plt.subplots(figsize=(10, 6))
 
         # Plotting using day numbers
-        ax.plot(self.dnevi, self.skupna_vrednost_investicije * np.ones_like(self.dnevi) * self.delež_investitorja, label='Vrednost investicije (proporcionalni delež kapitala podjetja glede na lastništvo)')
+        #ax.plot(self.dnevi, self.skupna_vrednost_investicije * np.ones_like(self.dnevi) * self.delež_investitorja, label='Vrednost investicije (proporcionalni delež kapitala podjetja glede na lastništvo)')
         ax.plot(self.dnevi, self.vložek_investitorja * np.ones_like(self.dnevi), label='Vložek investitorja')
         
         ax.plot(self.dnevi, stroški, label='Stroški')
@@ -153,7 +153,7 @@ if __name__ == '__main__':
     cena_čiščenja = st.sidebar.slider('Cena enega čiščenja (€)', min_value=0, max_value=20, value=15) / 1000
     provizija = st.sidebar.slider('Provizija na prihodke (%)', min_value=0, max_value=100, value=10) / 100
     letni_stroški_vzdrževanja_okolice = st.sidebar.slider('Letni stroški vzdrževanja okolice (€)', min_value=0, max_value=10000, value=3500) / 1000
-    ostali_stroški = st.sidebar.slider('Ostali stroški (€)', min_value=0, max_value=50000, value=10000) / 1000
+    ostali_stroški = st.sidebar.slider('Ostali letni stroški (elektrika, takse,...) (€)', min_value=0, max_value=50000, value=10000) / 1000
     
 
     model = Model(št_let, skupna_vrednost_investicije=skupni_vložek, vložek_investitorja=vložek_investitorja, delež_investitorja=delež_investitorja, amortizacijska_stopnja=amortizacijska_stopnja, pogostost_čiščenja=pogostost_čiščenja, cena_čiščenja=cena_čiščenja, pričakovano_št_dni_v_najemu_na_leto=pričakovano_št_dni_v_najemu_na_leto, p_dnevni_najem=p_dnevni_najem, provizija=provizija, letni_stroški_vzdrževanja_okolice=letni_stroški_vzdrževanja_okolice, letni_ostali_stroški=ostali_stroški, delez_davka_na_dobicek=delez_davka_na_dobicek)
