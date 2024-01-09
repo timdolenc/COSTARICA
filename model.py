@@ -11,7 +11,7 @@ class Model:
         self.delež_investitorja = delež_investitorja
         
         self.skupna_vrednost_investicije = skupna_vrednost_investicije
-        self.vložek_investitorja = vložek_investitorja
+        self.vložek_investitorja = self.skupna_vrednost_investicije * self.delež_investitorja
         self.št_hiš = 12
 
         self.amortizacijska_stopnja = amortizacijska_stopnja
@@ -43,7 +43,7 @@ class Model:
     def stroški_po_času(self):
         amortizacija = self.stroški_amortizacije_po_času()
         čiščenje = self.stroški_čiščenja()
-        prihodki = self.prihodki_po_času()
+        prihodki = self.prihodki_po_času() / self.delež_investitorja
         
         stroški_provizij = self.provizija * prihodki
         okolica = self.letni_stroški_vzdrževanja_okolice * self.dnevi / 365
@@ -68,10 +68,10 @@ class Model:
 
     ##########################LETNE ZADEVE#############################################
     def letni_prihodki(self):
-        return self.prihodki_po_času()[365] * self.delež_investitorja
+        return self.prihodki_po_času()[365]
 
     def letni_stroški(self):
-        return self.stroški_po_času()[365] * self.delež_investitorja
+        return self.stroški_po_času()[365]
 
     def letni_dobiček_pred_davki(self):
         return self.letni_prihodki() - self.letni_stroški()
@@ -139,9 +139,9 @@ if __name__ == '__main__':
 
     #STRUKTURA INVESTICIJE
     skupni_vložek = st.sidebar.slider('Celotna investicija (v 1000€)', min_value=0, max_value=5000, value=2750)
-    vložek_investitorja = st.sidebar.slider('Vložek investitorja (v 1000€)', min_value=0, max_value=1000, value=300)
+    #vložek_investitorja = st.sidebar.slider('Vložek investitorja (v 1000€)', min_value=0, max_value=1000, value=300)
     delež_investitorja = st.sidebar.slider('Delež investitorja (%)', min_value=0, max_value=100, value=12) / 100
-
+    vložek_investitorja = skupni_vložek * delež_investitorja
     #PRIHODKI
     pričakovano_št_dni_v_najemu_na_leto = st.sidebar.slider('Pričakovano število dni v najemu na leto', min_value=0, max_value=365, value=200)
     p_dnevni_najem = st.sidebar.slider('Pričakovana cena dnevnega najema (€)', min_value=0, max_value=500, value=250) / 1000
