@@ -133,9 +133,11 @@ class Model:
         # Calculation for intersection points
         vračilna_doba_investicije_brez_davka = np.argmin(np.abs(dobiček / (1-self.delez_davka_na_dobicek) - self.vložek_investitorja)) / 365
         vračilna_doba_investicije_davek = np.argmin(np.abs(dobiček - self.vložek_investitorja)) / 365
+        letna_donosnost = self.letni_dobiček_po_davkih() / self.vložek_investitorja
         
         st.markdown(f"**Vračilna doba investicije (bruto):** {vračilna_doba_investicije_brez_davka:.1f} let")
         st.markdown(f"**Vračilna doba investicije (upoštevajoč davek):** {vračilna_doba_investicije_davek:.1f} let")
+        st.markdown(f"**Letna donosnost:** {100*letna_donosnost:.2f} %")
     
         
         # Display the plot
