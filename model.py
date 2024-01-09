@@ -110,15 +110,24 @@ class Model:
         ax.grid(True)
 
         #okence z rezultati
-        col1, col2, col3, col4 = st.columns(4)
+
+        
+        # Define the relative sizes of the columns to accommodate the content
+        col_widths = [3,3,3,3]  # Adjust the values as needed
+
+        col1, col2, col3, col4 = st.columns(col_widths)
         with col1:
-            st.metric("Letni prihodki", f"{self.letni_prihodki():.3f} $")
+            st.metric("Letni prihodki", f"{self.letni_prihodki():,.3f}".replace(',', '.') + " $")
         with col2:
-            st.metric("Letni stroški", f"{self.letni_stroški():.3f} $")
+            st.metric("Letni stroški", f"{self.letni_stroški():,.3f}".replace(',', '.') + " $")
         with col3:
-            st.metric("Letni običek pred davki", f"{self.letni_dobiček_pred_davki():.3f} $")
+            st.metric("Letni dobiček pred davki", f"{self.letni_dobiček_pred_davki():,.3f}".replace(',', '.') + " $")
         with col4:
-            st.metric("Letni dobiček po davkih", f"{self.letni_dobiček_po_davkih():.3f} $")
+            st.metric("Letni dobiček po davkih", f"{self.letni_dobiček_po_davkih():,.3f}".replace(',', '.') + " $")
+
+
+
+
 
 
         # Calculation for intersection points
@@ -136,6 +145,23 @@ class Model:
 
 if __name__ == '__main__':
     št_let = 15
+
+    import streamlit as st
+
+# Custom CSS to inject into Streamlit's HTML
+    st.markdown("""
+        <style>
+            /* Remove padding and margin from the main block */
+            .css-18e3th9 {
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            /* Additional selectors for more specific adjustments might be necessary */
+        </style>
+    """, unsafe_allow_html=True)
+
+    # Your Streamlit app code here
+
 
     #STRUKTURA INVESTICIJE
     skupni_vložek = st.sidebar.slider('Celotna investicija (v 1000$)', min_value=0, max_value=5000, value=2750)
