@@ -1,152 +1,167 @@
 import streamlit as st
 import matplotlib.pyplot as plt
 import numpy as np
+import sys
+
+class Model:
+    def __init__(self, št_let, skupna_vrednost_investicije, vložek_investitorja, delež_investitorja, amortizacijska_stopnja, pogostost_čiščenja, cena_čiščenja, pričakovano_št_dni_v_najemu_na_leto, p_dnevni_najem, provizija, letni_stroški_vzdrževanja_okolice, letni_ostali_stroški, delez_davka_na_dobicek):
+        self.št_let = št_let
+        self.št_dni = št_let * 365
+        self.dnevi = np.arange(1, self.št_dni + 1)
+        self.delež_investitorja = delež_investitorja
+        
+        self.skupna_vrednost_investicije = skupna_vrednost_investicije
+        self.vložek_investitorja = vložek_investitorja
+        self.št_hiš = 12
+
+        self.amortizacijska_stopnja = amortizacijska_stopnja
+        self.pogostost_čiščenja = pogostost_čiščenja
+        self.cena_čiščenja = cena_čiščenja
+        self.pričakovano_št_dni_v_najemu_na_leto = pričakovano_št_dni_v_najemu_na_leto
+        self.p_dnevni_najem = p_dnevni_najem
+        self.provizija = provizija
+        self.letni_stroški_vzdrževanja_okolice = letni_stroški_vzdrževanja_okolice
+        self.letni_ostali_stroški = letni_ostali_stroški
+        self.delez_davka_na_dobicek = delez_davka_na_dobicek
 
 
+    ######################STROŠKI##############################
+    def stroški_čiščenja(self):
+        faktor_zasedenosti = self.pričakovano_št_dni_v_najemu_na_leto / 365
+        št_čiščenj = self.št_hiš * self.dnevi * faktor_zasedenosti / self.pogostost_čiščenja
+        stroški = št_čiščenj * self.cena_čiščenja
+        return stroški 
 
-#################STROŠKI#####################
-@st.cache_data
-def stroški_čiščenja(št_dni, pričakovano_št_dni_v_najemu_na_leto, pogostost_čiščenja, cena_čiščenja, št_hiš=12):
-    št_mesecev = št_dni / 30.5
-    št_let = št_mesecev / 12
-
-    faktor_zasedenosti = pričakovano_št_dni_v_najemu_na_leto / 365
-    št_čiščenj = št_hiš * št_dni * faktor_zasedenosti / pogostost_čiščenja
-    stroški = št_čiščenj * cena_čiščenja 
-
-    return stroški
-
-@st.cache_data
-def stroški_amortizacije_po_času(št_dni, začetna_inv, amortizacijska_stopnja):
-    amortizacija = začetna_inv * amortizacijska_stopnja ** (št_dni/365)
-    return amortizacija
-
-
-def stroški_po_času(št_dni, začetna_inv, amortizacijska_stopnja, pogostost_čiščenja, cena_čiščenja, pričakovano_št_dni_v_najemu_na_leto, p_dnevni_najem, provizija, letni_stroški_vzdrževanja_okolice, letni_ostali_stroški):
-    """predpostavlja ničelno om"""
-    št_mesecev = št_dni / 30.5
-
-    amortizacija = stroški_amortizacije_po_času(št_dni, začetna_inv, amortizacijska_stopnja)
-    čiščenje = stroški_čiščenja(št_dni, pričakovano_št_dni_v_najemu_na_leto, pogostost_čiščenja, cena_čiščenja, št_hiš=12)
-    prihodki = prihodki_po_času(št_dni, p_dnevni_najem)
-    stroški_provizij = prihodki * provizija
-
-    stroški = amortizacija + čiščenje + stroški_provizij
-    return stroški
-
-
-
-####################################################
-
-def začetna_investicija(p_zemlja, p_hiša, delež_nepredvidljivih_stroškov_na_hiško, št_hiš=12):
-    vložek = p_zemlja + št_hiš * p_hiša * delež_nepredvidljivih_stroškov_na_hiško
-    return vložek
-
-@st.cache_data
-def prihodki_po_času(št_dni, pričakovano_št_dni_v_najemu_na_leto, p_dnevni_najem, št_hiš=12):
-    """predpostavlja ničelno om"""
-    št_mesecev = št_dni / 30.5
-    št_let = št_mesecev / 12
-
-    faktor_zasedenosti = pričakovano_št_dni_v_najemu_na_leto / 365
-
-    prihodki = št_hiš * p_dnevni_najem * št_dni * faktor_zasedenosti
-
-    return prihodki
-
-def stroški_provizije(prihodki, provizija):
-    return prihodki * provizija
-
-def vrednost_investicije(p_hiša, p_zemlja, št_hiš, amortizacijski_faktor, rast_vr_zemlje, št_dni):
-    #vrednost
-    št_mesecev = št_dni / 30.5
-    št_let = št_mesecev / 12
-    vrednost_hiške = p_hiša * amortizacijski_faktor ** št_let
-    vrednost_zemlje = p_zemlja * (1+rast_vr_zemlje)**št_let
-
-    vrednost = št_hiš * vrednost_hiške + vrednost_zemlje
-
-    return vrednost
-
-@st.cache_data
-def dobiček_po_času(stroški, prihodki, delez_davka_na_dobicek):
-    dobiček = (prihodki - stroški) * (1 - delez_davka_na_dobicek)
-
-    return dobiček
-
-
-
-
-def plot_data(št_let, skupna_inv, začetna_inv, vrednost_inv, delež_v_podjetju, p_dnevni_najem, delez_davka_na_dobicek, pričakovano_št_dni_v_najemu_na_leto, amortizacijska_stopnja, ):
-    št_dni = št_let * 365
-    dni = np.arange(1, št_dni + 1)
-
-    vrednost_inv_sez = [vrednost_inv * delež_v_podjetju for dan in dni]
-    začetna_inv_sez = [vložek_investitorja for dan in dni]
-
-    # Izračuni za vsak dan
-    #začetna_inv0 = začetna_investicija(p_zemlja, p_hiša, št_hiš, delež_nepredvidljivih_stroškov_na_hiško)
+    #@st.cache_data
+    def stroški_amortizacije_po_času(self):
+        amortizacija = self.skupna_vrednost_investicije * self.amortizacijska_stopnja * (self.dnevi / 365)
+        return amortizacija
     
-    stroški = [stroški_po_času(dan, začetna_inv, mesecni_stroski, amortizacijska_stopnja) for dan in dni]
-    prihodki = [prihodki_po_času(dan, pričakovano_št_dni_v_najemu_na_leto, p_dnevni_najem) for dan in dni]
-    #vrednost = [vrednost_investicije(p_hiša, p_zemlja, št_hiš, amortizacijski_faktor, rast_vr_zemlje, dan) for dan in dni]
-    dobiček = [(prihodki[dan-1] - stroški[dan-1] - začetna_inv) * (1 - delez_davka_na_dobicek) for dan in dni]
-
-    # Create a figure and axes object
-    fig, ax = plt.subplots(figsize=(10, 6))
-
-    # Plotting using day numbers
-    ax.plot(dni, začetna_inv, label='Začetna investicija')
-    ax.plot(dni, stroški, label='Stroški')
-    ax.plot(dni, prihodki, label='Prihodki')
-    #ax.plot(dni, vrednost, label='Vrednost')
-    ax.plot(dni, dobiček, label='Dobiček (po davkih))')
-
-    # Set labels and title
-    ax.set_xlabel('Leto')
-    ax.set_ylabel('Vrednosti')
-    ax.set_title('Graf investicije skozi čas')
-    ax.legend()
-
-    # Adjust x-axis to show years
-    year_ticks = np.arange(365, št_dni + 1, 365)
-    ax.set_xticks(year_ticks)
-    ax.set_xticklabels(range(1, št_let + 1))
-    ax.grid(True)
-
-    # Pass the figure to st.pyplot()
-    st.pyplot(fig)
 
 
-st.title('Investicijski model')
 
-# Drsnik za število dni
-#št_dni = st.sidebar.slider('Število dni', min_value=1, max_value=365*30, value=365*10)
-št_let = st.sidebar.slider('Število let', min_value=1, max_value=30, value=10)
-#p_zemlja = st.sidebar.slider('Cena zemlje', min_value=50.0, max_value=200.0, value=100.0)
-#p_hiša = st.sidebar.slider('Cena hiše', min_value=50.0, max_value=200.0, value=90.0)
+    def stroški_po_času(self):
+        amortizacija = self.stroški_amortizacije_po_času()
+        čiščenje = self.stroški_čiščenja()
+        prihodki = self.prihodki_po_času()
+        
+        stroški_provizij = self.provizija * prihodki
+        okolica = self.letni_stroški_vzdrževanja_okolice * self.dnevi / 365
+        ostali_stroški = self.letni_ostali_stroški * self.dnevi / 365
 
-skupni_vložek = st.sidebar.slider('Vložek', min_value=0, max_value=3000, value=2100)
-vložek_investitorja = st.sidebar.slider('Vložek investitorja', min_value=0, max_value=3000, value=2100)
-delež_investitorja = st.sidebar.slider('Delež investitorja', min_value=0.0, max_value=1.0, value=0.12)
+        stroški = amortizacija + čiščenje + stroški_provizij + okolica + ostali_stroški
+        return stroški * self.delež_investitorja
 
-
-#mesecni_stroski = st.sidebar.slider('Mesečni stroški', min_value=0.0, max_value=10.0, value=1.5)
-#p_dnevni_najem = st.sidebar.slider('Dnevni najem', min_value=0.1, max_value=1.0, value=0.25)
-#št_hiš = st.sidebar.slider('Število hiš', min_value=1, max_value=20, value=12)
-#rast_vr_zemlje = st.sidebar.slider('Rast vrednosti zemlje', min_value=0.0, max_value=0.1, value=0.03)
-#amortizacijski_faktor = st.sidebar.slider('Amortizacijski faktor', min_value=0.0, max_value=1.0, value=0.9)
-amortizacijska_stopnja = st.sidebar.slider('Amortizacijska stopnja', min_value=0.0, max_value=1.0, value=0.05)
-delez_davka_na_dobicek = st.sidebar.slider('Delež davka na dobiček', min_value=0.0, max_value=0.5, value=0.30)
-#delež_nepredvidljivih_stroškov_na_hiško = st.sidebar.slider('Delež nepredvidljivih stroškov na hiško', min_value=1.0, max_value=2.0, value=1.1)
-pričakovano_št_dni_v_najemu_na_leto = st.sidebar.slider('Pričakovano število dni v najemu na leto', min_value=0, max_value=365, value=100)
+    #######################################################################
+    #@st.cache_data
+    def prihodki_po_času(self):
+        faktor_zasedenosti = self.pričakovano_št_dni_v_najemu_na_leto / 365
+        prihodki = self.št_hiš * self.p_dnevni_najem * self.dnevi * faktor_zasedenosti
+        return prihodki * self.delež_investitorja
 
 
-#if st.button('Izračunaj dobiček'):
-#    dobiček = dobiček_po_času(št_let, p_zemlja, p_hiša, št_hiš, mesecni_stroski, p_dnevni_najem, amortizacijski_faktor, rast_vr_zemlje, delež_nepredvidljivih_stroškov_na_hiško, delez_davka_na_dobicek, pričakovano_št_dni_v_najemu_na_leto)
-#    st.write(f'Dobiček po {št_let} letih: {dobiček}')
+    def dobiček_po_času(self):
+        stroški = self.stroški_po_času()
+        prihodki = self.prihodki_po_času()
+        dobiček = (prihodki - stroški) * (1 - self.delez_davka_na_dobicek)
+        return dobiček
 
-# Klic funkcije plot_data ob spremembi kateregakoli drsnika
-plot_data(št_let, p_zemlja, p_hiša, št_hiš, mesecni_stroski, p_dnevni_najem, amortizacijski_faktor, rast_vr_zemlje, delež_nepredvidljivih_stroškov_na_hiško, delez_davka_na_dobicek, pričakovano_št_dni_v_najemu_na_leto, amortizacijska_stopnja)
+    ##########################LETNE ZADEVE#############################################
+    def letni_prihodki(self):
+        return self.prihodki_po_času()[365] * self.delež_investitorja
+
+    def letni_stroški(self):
+        return self.stroški_po_času()[365] * self.delež_investitorja
+
+    def letni_dobiček_pred_davki(self):
+        return self.letni_prihodki() - self.letni_stroški()
+
+    def letni_dobiček_po_davkih(self):
+        return self.letni_dobiček_pred_davki() * (1 - self.delez_davka_na_dobicek)
+
+    #######################################################################
+    def plot_data(self):
+   
+        stroški = self.stroški_po_času()
+        prihodki = self.prihodki_po_času()
+        dobiček = self.dobiček_po_času()
+
+        # Create a figure and axes object
+        fig, ax = plt.subplots(figsize=(10, 6))
+
+        # Plotting using day numbers
+        #ax.plot(self.dnevi, self.skupna_vrednost_investicije * np.ones_like(self.dnevi) * self.delež_investitorja, label='Vrednost investicije (proporcionalni delež kapitala podjetja glede na lastništvo)')
+        ax.plot(self.dnevi, self.vložek_investitorja * np.ones_like(self.dnevi), label='Vložek investitorja')
+        
+        ax.plot(self.dnevi, stroški, label='Stroški')
+        ax.plot(self.dnevi, prihodki, label='Prihodki')
+        ax.plot(self.dnevi, dobiček, label='Dobiček (po davkih)')
+
+        # Set labels and title
+        ax.set_xlabel('Število let')
+        ax.set_ylabel('1000€')
+        ax.set_title('Graf investicije skozi čas')
+        ax.legend()
+
+        # Adjust x-axis to show years
+        year_ticks = np.arange(365, self.št_dni + 1, 365)
+        ax.set_xticks(year_ticks)
+        ax.set_xticklabels(range(1, self.št_dni // 365 + 1))
+        ax.grid(True)
+
+        #okence z rezultati
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.metric("Letni prihodki", f"{1000 * self.letni_prihodki():.0f} €")
+        with col2:
+            st.metric("Letni stroški", f"{1000* self.letni_stroški():.0f} €")
+        with col3:
+            st.metric("Letni običek pred davki", f"{1000*self.letni_dobiček_pred_davki():.0f} €")
+        with col4:
+            st.metric("Letni dobiček po davkih", f"{1000*self.letni_dobiček_po_davkih():.0f} €")
 
 
+        # Calculation for intersection points
+        vračilna_doba_investicije_brez_davka = np.argmin(np.abs(dobiček / (1-self.delez_davka_na_dobicek) - self.vložek_investitorja)) / 365
+        vračilna_doba_investicije_davek = np.argmin(np.abs(dobiček - self.vložek_investitorja)) / 365
+        
+        st.markdown(f"**Vračilna doba investicije (bruto):** {vračilna_doba_investicije_brez_davka:.1f} let")
+        st.markdown(f"**Vračilna doba investicije (upoštevajoč davek):** {vračilna_doba_investicije_davek:.1f} let")
+    
+        
+        # Display the plot
+        st.pyplot(fig)
+
+
+
+if __name__ == '__main__':
+    št_let = 15
+
+    #STRUKTURA INVESTICIJE
+    skupni_vložek = st.sidebar.slider('Celotna investicija (v 1000€)', min_value=0, max_value=5000, value=2750)
+    vložek_investitorja = st.sidebar.slider('Vložek investitorja (v 1000€)', min_value=0, max_value=1000, value=300)
+    delež_investitorja = st.sidebar.slider('Delež investitorja (%)', min_value=0, max_value=100, value=12) / 100
+
+    #PRIHODKI
+    pričakovano_št_dni_v_najemu_na_leto = st.sidebar.slider('Pričakovano število dni v najemu na leto', min_value=0, max_value=365, value=200)
+    p_dnevni_najem = st.sidebar.slider('Pričakovana cena dnevnega najema (€)', min_value=0, max_value=500, value=250) / 1000
+    
+    #STROŠKI
+    amortizacijska_stopnja = st.sidebar.slider('Amortizacijska stopnja (%)', min_value=0, max_value=30, value=5) / 100
+    delez_davka_na_dobicek = st.sidebar.slider('Delež davka na dobiček (%)', min_value=0, max_value=100, value=20) / 100
+    pogostost_čiščenja = st.sidebar.slider('Pogostost čiščenja (na koliko dni)', min_value=1, max_value=30, value=5)
+    cena_čiščenja = st.sidebar.slider('Cena enega čiščenja (€)', min_value=0, max_value=20, value=15) / 1000
+    provizija = st.sidebar.slider('Provizija na prihodke (%)', min_value=0, max_value=100, value=10) / 100
+    letni_stroški_vzdrževanja_okolice = st.sidebar.slider('Letni stroški vzdrževanja okolice (€)', min_value=0, max_value=10000, value=3500) / 1000
+    ostali_stroški = st.sidebar.slider('Ostali stroški (€)', min_value=0, max_value=50000, value=10000) / 1000
+    
+
+    model = Model(št_let, skupna_vrednost_investicije=skupni_vložek, vložek_investitorja=vložek_investitorja, delež_investitorja=delež_investitorja, amortizacijska_stopnja=amortizacijska_stopnja, pogostost_čiščenja=pogostost_čiščenja, cena_čiščenja=cena_čiščenja, pričakovano_št_dni_v_najemu_na_leto=pričakovano_št_dni_v_najemu_na_leto, p_dnevni_najem=p_dnevni_najem, provizija=provizija, letni_stroški_vzdrževanja_okolice=letni_stroški_vzdrževanja_okolice, letni_ostali_stroški=ostali_stroški, delez_davka_na_dobicek=delez_davka_na_dobicek)
+    
+
+    st.title('Investicijski model')
+    model.plot_data()
+        
+        
+
+    

@@ -1,0 +1,2 @@
+- update all methods for me chatgpt X
+- group parameters sliders
