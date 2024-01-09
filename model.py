@@ -149,7 +149,7 @@ if __name__ == '__main__':
     #STROŠKI
     amortizacijska_stopnja = st.sidebar.slider('Amortizacijska stopnja (%)', min_value=0, max_value=30, value=5) / 100
     delez_davka_na_dobicek = st.sidebar.slider('Delež davka na dobiček (%)', min_value=0, max_value=100, value=20) / 100
-    pogostost_čiščenja = st.sidebar.slider('Pogostost čiščenja (na koliko dni)', min_value=1, max_value=30, value=5)
+    pogostost_čiščenja = st.sidebar.slider('Pogostost čiščenja (na koliko dni najema)', min_value=1, max_value=30, value=5)
     cena_čiščenja = st.sidebar.slider('Cena enega čiščenja (€)', min_value=0, max_value=20, value=15) / 1000
     provizija = st.sidebar.slider('Provizija na prihodke (%)', min_value=0, max_value=100, value=10) / 100
     letni_stroški_vzdrževanja_okolice = st.sidebar.slider('Letni stroški vzdrževanja okolice (€)', min_value=0, max_value=10000, value=3500) / 1000
