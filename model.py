@@ -90,7 +90,7 @@ class Model:
         fig, ax = plt.subplots(figsize=(10, 6))
 
         # Plotting using day numbers
-        #ax.plot(self.dnevi, self.skupna_vrednost_investicije * np.ones_like(self.dnevi) * self.delež_investitorja, label='Vrednost investicije (proporcionalni delež kapitala podjetja glede na lastništvo)')
+        ax.plot(self.dnevi, self.skupna_vrednost_investicije * np.ones_like(self.dnevi) * self.delež_investitorja, label='Vrednost investicije (proporcionalni delež kapitala podjetja glede na lastništvo)')
         ax.plot(self.dnevi, self.vložek_investitorja * np.ones_like(self.dnevi), label='Vložek investitorja')
         
         ax.plot(self.dnevi, stroški, label='Stroški')
