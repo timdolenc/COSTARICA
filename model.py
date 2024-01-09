@@ -99,7 +99,7 @@ class Model:
 
         # Set labels and title
         ax.set_xlabel('Število let')
-        ax.set_ylabel('1000€')
+        ax.set_ylabel('1000$')
         ax.set_title('Graf investicije skozi čas')
         ax.legend()
 
@@ -112,13 +112,13 @@ class Model:
         #okence z rezultati
         col1, col2, col3, col4 = st.columns(4)
         with col1:
-            st.metric("Letni prihodki", f"{1000 * self.letni_prihodki():.0f} €")
+            st.metric("Letni prihodki", f"{self.letni_prihodki():.3f} $")
         with col2:
-            st.metric("Letni stroški", f"{1000* self.letni_stroški():.0f} €")
+            st.metric("Letni stroški", f"{self.letni_stroški():.3f} $")
         with col3:
-            st.metric("Letni običek pred davki", f"{1000*self.letni_dobiček_pred_davki():.0f} €")
+            st.metric("Letni običek pred davki", f"{self.letni_dobiček_pred_davki():.3f} $")
         with col4:
-            st.metric("Letni dobiček po davkih", f"{1000*self.letni_dobiček_po_davkih():.0f} €")
+            st.metric("Letni dobiček po davkih", f"{self.letni_dobiček_po_davkih():.3f} $")
 
 
         # Calculation for intersection points
@@ -138,22 +138,22 @@ if __name__ == '__main__':
     št_let = 15
 
     #STRUKTURA INVESTICIJE
-    skupni_vložek = st.sidebar.slider('Celotna investicija (v 1000€)', min_value=0, max_value=5000, value=2750)
+    skupni_vložek = st.sidebar.slider('Celotna investicija (v 1000$)', min_value=0, max_value=5000, value=2750)
     #vložek_investitorja = st.sidebar.slider('Vložek investitorja (v 1000€)', min_value=0, max_value=1000, value=300)
     delež_investitorja = st.sidebar.slider('Delež investitorja (%)', min_value=0, max_value=100, value=12) / 100
     vložek_investitorja = skupni_vložek * delež_investitorja
     #PRIHODKI
     pričakovano_št_dni_v_najemu_na_leto = st.sidebar.slider('Pričakovano število dni v najemu na leto', min_value=0, max_value=365, value=200)
-    p_dnevni_najem = st.sidebar.slider('Pričakovana cena dnevnega najema (€)', min_value=0, max_value=500, value=250) / 1000
+    p_dnevni_najem = st.sidebar.slider('Pričakovana cena dnevnega najema ($)', min_value=0, max_value=500, value=250) / 1000
     
     #STROŠKI
     amortizacijska_stopnja = st.sidebar.slider('Amortizacijska stopnja (%)', min_value=0, max_value=30, value=5) / 100
     delez_davka_na_dobicek = st.sidebar.slider('Delež davka na dobiček (%)', min_value=0, max_value=100, value=20) / 100
     pogostost_čiščenja = st.sidebar.slider('Pogostost čiščenja (na koliko dni najema)', min_value=1, max_value=30, value=5)
-    cena_čiščenja = st.sidebar.slider('Cena enega čiščenja (€)', min_value=0, max_value=20, value=15) / 1000
+    cena_čiščenja = st.sidebar.slider('Cena enega čiščenja ($)', min_value=0, max_value=20, value=15) / 1000
     provizija = st.sidebar.slider('Provizija na prihodke (%)', min_value=0, max_value=100, value=10) / 100
-    letni_stroški_vzdrževanja_okolice = st.sidebar.slider('Letni stroški vzdrževanja okolice (€)', min_value=0, max_value=10000, value=3500) / 1000
-    ostali_stroški = st.sidebar.slider('Ostali letni stroški (elektrika, takse,...) (€)', min_value=0, max_value=50000, value=10000) / 1000
+    letni_stroški_vzdrževanja_okolice = st.sidebar.slider('Letni stroški vzdrževanja okolice ($)', min_value=0, max_value=10000, value=3500) / 1000
+    ostali_stroški = st.sidebar.slider('Ostali letni stroški (elektrika, takse,...) ($)', min_value=0, max_value=50000, value=10000) / 1000
     
 
     model = Model(št_let, skupna_vrednost_investicije=skupni_vložek, vložek_investitorja=vložek_investitorja, delež_investitorja=delež_investitorja, amortizacijska_stopnja=amortizacijska_stopnja, pogostost_čiščenja=pogostost_čiščenja, cena_čiščenja=cena_čiščenja, pričakovano_št_dni_v_najemu_na_leto=pričakovano_št_dni_v_najemu_na_leto, p_dnevni_najem=p_dnevni_najem, provizija=provizija, letni_stroški_vzdrževanja_okolice=letni_stroški_vzdrževanja_okolice, letni_ostali_stroški=ostali_stroški, delez_davka_na_dobicek=delez_davka_na_dobicek)
