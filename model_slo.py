@@ -89,13 +89,13 @@ class Model:
         fig, ax = plt.subplots(figsize=(10, 6))
 
         # Plotting using day numbers
-        ax.plot(self.dnevi, self.vložek_investitorja * np.ones_like(self.dnevi), label='Investment')
+        ax.plot(self.dnevi, self.vložek_investitorja * np.ones_like(self.dnevi), label='Investor Contribution')
         ax.plot(self.dnevi, stroški, label='Costs')
         ax.plot(self.dnevi, prihodki, label='Revenues')
         ax.plot(self.dnevi, dobiček, label='Profit (after taxes)')
 
         # Set labels and title
-        ax.set_xlabel('Years')
+        ax.set_xlabel('Number of Years')
         ax.set_ylabel('1000$')
         ax.set_title('Investment Chart Over Time')
         ax.legend()
@@ -154,26 +154,29 @@ if __name__ == '__main__':
     # Your Streamlit app code here
 
 
-    skupni_vložek = st.sidebar.slider('Total Investment (in $1000)', min_value=0, max_value=5000, value=2750)
-    delež_investitorja = st.sidebar.slider('Investor Share (%)', min_value=0, max_value=100, value=12) / 100
+    #STRUKTURA INVESTICIJE
+    skupni_vložek = st.sidebar.slider('Celotna investicija (v 1000$)', min_value=0, max_value=5000, value=2750)
+    #vložek_investitorja = st.sidebar.slider('Vložek investitorja (v 1000€)', min_value=0, max_value=1000, value=300)
+    delež_investitorja = st.sidebar.slider('Delež investitorja (%)', min_value=0, max_value=100, value=12) / 100
     vložek_investitorja = skupni_vložek * delež_investitorja
-    pričakovano_št_dni_v_najemu_na_leto = st.sidebar.slider('Expected Number of Days Rented per Year', min_value=0, max_value=365, value=200)
-    p_dnevni_najem = st.sidebar.slider('Expected Daily Rent Price ($)', min_value=0, max_value=500, value=250) / 1000
-
-    amortizacijska_stopnja = st.sidebar.slider('Amortization Rate (%)', min_value=0, max_value=30, value=5) / 100
-    delez_davka_na_dobicek = st.sidebar.slider('Tax Rate on Profit (%)', min_value=0, max_value=100, value=20) / 100
-    pogostost_čiščenja = st.sidebar.slider('Days between cleaning (rented)', min_value=1, max_value=30, value=5)
-    cena_čiščenja = st.sidebar.slider('Price per Cleaning ($)', min_value=0, max_value=20, value=15) / 1000
-    provizija = st.sidebar.slider('Commission on Revenues (%)', min_value=0, max_value=100, value=10) / 100
-    letni_stroški_vzdrževanja_okolice = st.sidebar.slider('Annual Maintenance Costs ($)', min_value=0, max_value=10000, value=3500) / 1000
-    ostali_stroški = st.sidebar.slider('Other Annual Costs (electricity, taxes, etc.) ($)', min_value=0, max_value=50000, value=10000) / 1000
-
+    #PRIHODKI
+    pričakovano_št_dni_v_najemu_na_leto = st.sidebar.slider('Pričakovano število dni v najemu na leto', min_value=0, max_value=365, value=200)
+    p_dnevni_najem = st.sidebar.slider('Pričakovana cena dnevnega najema ($)', min_value=0, max_value=500, value=250) / 1000
+    
+    #STROŠKI
+    amortizacijska_stopnja = st.sidebar.slider('Amortizacijska stopnja (%)', min_value=0, max_value=30, value=5) / 100
+    delez_davka_na_dobicek = st.sidebar.slider('Delež davka na dobiček (%)', min_value=0, max_value=100, value=20) / 100
+    pogostost_čiščenja = st.sidebar.slider('Pogostost čiščenja (na koliko dni najema)', min_value=1, max_value=30, value=5)
+    cena_čiščenja = st.sidebar.slider('Cena enega čiščenja ($)', min_value=0, max_value=20, value=15) / 1000
+    provizija = st.sidebar.slider('Provizija na prihodke (%)', min_value=0, max_value=100, value=10) / 100
+    letni_stroški_vzdrževanja_okolice = st.sidebar.slider('Letni stroški vzdrževanja okolice ($)', min_value=0, max_value=10000, value=3500) / 1000
+    ostali_stroški = st.sidebar.slider('Ostali letni stroški (elektrika, takse,...) ($)', min_value=0, max_value=50000, value=10000) / 1000
     
 
     model = Model(št_let, skupna_vrednost_investicije=skupni_vložek, vložek_investitorja=vložek_investitorja, delež_investitorja=delež_investitorja, amortizacijska_stopnja=amortizacijska_stopnja, pogostost_čiščenja=pogostost_čiščenja, cena_čiščenja=cena_čiščenja, pričakovano_št_dni_v_najemu_na_leto=pričakovano_št_dni_v_najemu_na_leto, p_dnevni_najem=p_dnevni_najem, provizija=provizija, letni_stroški_vzdrževanja_okolice=letni_stroški_vzdrževanja_okolice, letni_ostali_stroški=ostali_stroški, delez_davka_na_dobicek=delez_davka_na_dobicek)
     
 
-    st.title('INVESTMENT CALCULATOR')
+    st.title('Investicijski model')
     model.plot_data()
         
         
