@@ -155,7 +155,7 @@ if __name__ == '__main__':
 
     #skupni_vložek = st.sidebar.slider('Total Investment (in $1000)', min_value=0, max_value=5000, value=2750)
 
-    skupni_vložek = 3100
+    skupni_vložek = 3200
     delež_investitorja = st.sidebar.slider('Investor Share (%)', min_value=0, max_value=100, value=12) / 100
     vložek_investitorja = skupni_vložek * delež_investitorja
     pričakovano_št_dni_v_najemu_na_leto = st.sidebar.slider('Expected Number of Days Rented per Year', min_value=0, max_value=365, value=200)
