@@ -92,7 +92,7 @@ class Model:
         ax.plot(self.dnevi, self.vložek_investitorja * np.ones_like(self.dnevi), label='Investment')
         #ax.plot(self.dnevi, stroški, label='Costs')
         ax.plot(self.dnevi, prihodki, label='Revenues')
-        ax.plot(self.dnevi, dobiček, label='Profit (after taxes)')
+        ax.plot(self.dnevi, dobiček, label='Profit') # (after taxes)
 
         # Set labels and title
         ax.set_xlabel('Years')
@@ -115,8 +115,7 @@ class Model:
         with col2:
             st.metric("Annual Costs", f"{self.letni_stroški():,.3f}".replace(',', '.') + " $")
         with col3:
-            st.metric("Annual Profit Before Taxes", f"{self.letni_dobiček_pred_davki():,.3f}".replace(',', '.') + " $")
-        #with col4:
+            st.metric("Annual Profit before taxes", f"{self.letni_dobiček_pred_davki():,.3f}".replace(',', '.') + " $") # Before Taxes
         #    st.metric("Annual Profit After Taxes", f"{self.letni_dobiček_po_davkih():,.3f}".replace(',', '.') + " $")
 
         # Calculation for intersection points
