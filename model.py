@@ -90,7 +90,7 @@ class Model:
 
         # Plotting using day numbers
         ax.plot(self.dnevi, self.vložek_investitorja * np.ones_like(self.dnevi), label='Investment')
-        ax.plot(self.dnevi, stroški, label='Costs')
+        #ax.plot(self.dnevi, stroški, label='Costs')
         ax.plot(self.dnevi, prihodki, label='Revenues')
         ax.plot(self.dnevi, dobiček, label='Profit (after taxes)')
 
@@ -116,8 +116,8 @@ class Model:
             st.metric("Annual Costs", f"{self.letni_stroški():,.3f}".replace(',', '.') + " $")
         with col3:
             st.metric("Annual Profit Before Taxes", f"{self.letni_dobiček_pred_davki():,.3f}".replace(',', '.') + " $")
-        with col4:
-            st.metric("Annual Profit After Taxes", f"{self.letni_dobiček_po_davkih():,.3f}".replace(',', '.') + " $")
+        #with col4:
+        #    st.metric("Annual Profit After Taxes", f"{self.letni_dobiček_po_davkih():,.3f}".replace(',', '.') + " $")
 
         # Calculation for intersection points
         payback_period_without_tax = np.argmin(np.abs(dobiček / (1 - self.delez_davka_na_dobicek) - self.vložek_investitorja)) / 365
@@ -154,7 +154,9 @@ if __name__ == '__main__':
     # Your Streamlit app code here
 
 
-    skupni_vložek = st.sidebar.slider('Total Investment (in $1000)', min_value=0, max_value=5000, value=2750)
+    #skupni_vložek = st.sidebar.slider('Total Investment (in $1000)', min_value=0, max_value=5000, value=2750)
+
+    skupni_vložek = 3100
     delež_investitorja = st.sidebar.slider('Investor Share (%)', min_value=0, max_value=100, value=12) / 100
     vložek_investitorja = skupni_vložek * delež_investitorja
     pričakovano_št_dni_v_najemu_na_leto = st.sidebar.slider('Expected Number of Days Rented per Year', min_value=0, max_value=365, value=200)
@@ -164,7 +166,7 @@ if __name__ == '__main__':
     delez_davka_na_dobicek = st.sidebar.slider('Tax Rate on Profit (%)', min_value=0, max_value=100, value=20) / 100
     pogostost_čiščenja = st.sidebar.slider('Days between cleaning (rented)', min_value=1, max_value=30, value=5)
     cena_čiščenja = st.sidebar.slider('Price per Cleaning ($)', min_value=0, max_value=20, value=15) / 1000
-    provizija = st.sidebar.slider('Commission on Revenues (%)', min_value=0, max_value=100, value=10) / 100
+    provizija = st.sidebar.slider('Commission on revenues and taxes (VAT) (%)', min_value=0, max_value=100, value=10) / 100
     letni_stroški_vzdrževanja_okolice = st.sidebar.slider('Annual Maintenance Costs ($)', min_value=0, max_value=10000, value=3500) / 1000
     ostali_stroški = st.sidebar.slider('Other Annual Costs (electricity, taxes, etc.) ($)', min_value=0, max_value=50000, value=10000) / 1000
 
