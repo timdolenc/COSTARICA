@@ -91,7 +91,7 @@ class Model:
         # Plotting using day numbers
         ax.plot(self.dnevi, self.vložek_investitorja * np.ones_like(self.dnevi), label='Investment')
         #ax.plot(self.dnevi, stroški, label='Costs')
-        ax.plot(self.dnevi, prihodki, label='Revenues')
+        #ax.plot(self.dnevi, prihodki, label='Revenues')
         ax.plot(self.dnevi, dobiček, label='Profit') # (after taxes)
 
         # Set labels and title
